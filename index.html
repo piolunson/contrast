@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CONTRAST</title>
+<style>
+  :root {
+    --ink: #000;
+    --paper: #fff;
+    --hit: #ff0;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 12px; }
+  h1 {
+    font-family: Impact, "Arial Black", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 900;
+    font-size: clamp(56px, 19vw, 190px);
+    line-height: .82;
+    letter-spacing: -.04em;
+    margin: 0;
+    padding: 8px 0 14px;
+    border-bottom: 8px solid var(--ink);
+    word-break: break-all;
+  }
+  .rule {
+    font-weight: 700;
+    font-size: 18px;
+    padding: 12px 0;
+    border-bottom: 4px solid var(--ink);
+    max-width: 62ch;
+  }
+  .panel {
+    border: 4px solid var(--ink);
+    margin-top: 16px;
+    box-shadow: 10px 10px 0 var(--ink);
+    background: var(--paper);
+  }
+  .drop {
+    display: block;
+    padding: 36px 16px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 22px;
+    border-bottom: 4px solid var(--ink);
+    background: var(--hit);
+  }
+  .drop.over { background: var(--ink); color: var(--paper); }
+  .drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .drop:focus-within { outline: 6px solid var(--ink); outline-offset: -10px; }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .ctl {
+    padding: 14px 16px;
+    border-bottom: 4px solid var(--ink);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  }
+  .ctl label { font-weight: 700; }
+  .ctl output {
+    font-family: Impact, "Arial Black", Arial, sans-serif;
+    font-size: 40px; line-height: 1; min-width: 3.2ch;
+  }
+  input[type=range] {
+    flex: 1 1 220px; min-width: 0;
+    -webkit-appearance: none; appearance: none;
+    height: 36px; background: transparent; margin: 0;
+  }
+  input[type=range]::-webkit-slider-runnable-track { height: 14px; background: var(--ink); }
+  input[type=range]::-moz-range-track { height: 14px; background: var(--ink); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 30px; height: 36px; margin-top: -11px;
+    background: var(--hit); border: 4px solid var(--ink); border-radius: 0;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 28px; background: var(--hit); border: 4px solid var(--ink); border-radius: 0;
+  }
+  input[type=range]:focus-visible { outline: 4px solid var(--ink); outline-offset: 2px; }
+  button, .btn {
+    font: inherit; font-weight: 700; font-size: 18px;
+    background: var(--paper); color: var(--ink);
+    border: 4px solid var(--ink); border-radius: 0;
+    padding: 10px 16px; cursor: pointer;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+  button:active { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--ink); }
+  button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+  .actions { padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; border-bottom: 4px solid var(--ink); }
+  .stage { display: none; }
+  .stage.on { display: block; }
+  .views { display: grid; grid-template-columns: 1fr; }
+  .view { border-bottom: 4px solid var(--ink); }
+  .view h2 {
+    margin: 0; padding: 8px 16px; font-size: 16px; font-weight: 700;
+    background: var(--ink); color: var(--paper);
+  }
+  .view canvas, .view img {
+    display: block; width: 100%; height: auto; max-width: 100%;
+    background:
+      repeating-linear-gradient(45deg, #ddd 0 10px, #fff 10px 20px);
+  }
+  .stats { padding: 14px 16px; font-weight: 700; display: flex; flex-wrap: wrap; gap: 8px 28px; }
+  .bar { height: 28px; border: 4px solid var(--ink); margin: 0 16px 16px; display: flex; }
+  .bar i { display: block; height: 100%; background: var(--ink); }
+  .bar b { display: block; height: 100%; flex: 1; background: var(--paper); }
+  footer { margin: 28px 0 12px; font-weight: 700; border-top: 8px solid var(--ink); padding-top: 10px; }
+  @media (min-width: 800px) {
+    .views { grid-template-columns: 1fr 1fr; }
+    .view:first-child { border-right: 4px solid var(--ink); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CONTRAST</h1>
+  <div class="rule">Wrzuć obraz. Wszystko ciemniejsze niż próg (domyślnie 50%) staje się czarne. Wszystko jaśniejsze staje się białe. Nic pośrodku.</div>
+
+  <div class="panel">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/*">
+      <span id="dropText">WRZUĆ OBRAZ LUB KLIKNIJ</span>
+    </label>
+
+    <div class="stage" id="stage">
+      <div class="controls">
+        <div class="ctl">
+          <label for="thr">PRÓG CZERNI</label>
+          <input type="range" id="thr" min="0" max="100" value="50">
+          <output id="thrOut" for="thr">50%</output>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="invert" aria-pressed="false">ODWRÓĆ</button>
+        <button id="reset">PRÓG 50%</button>
+        <button id="download">POBIERZ PNG</button>
+      </div>
+      <div class="views">
+        <div class="view"><h2>ORYGINAŁ</h2><canvas id="orig"></canvas></div>
+        <div class="view"><h2>WYNIK</h2><canvas id="out"></canvas></div>
+      </div>
+      <div class="stats">
+        <span id="sBlack">CZARNE: –</span>
+        <span id="sWhite">BIAŁE: –</span>
+        <span id="sSize">ROZMIAR: –</span>
+      </div>
+      <div class="bar" aria-hidden="true"><i id="barBlack" style="width:50%"></i><b></b></div>
+    </div>
+  </div>
+
+  <footer>Wszystko dzieje się w przeglądarce. Obraz nigdzie nie jest wysyłany.</footer>
+</div>
+
+<script>
+(function () {
+  var MAX = 2400; // limit longest side for speed
+  var file = document.getElementById('file');
+  var drop = document.getElementById('drop');
+  var dropText = document.getElementById('dropText');
+  var stage = document.getElementById('stage');
+  var thr = document.getElementById('thr');
+  var thrOut = document.getElementById('thrOut');
+  var invertBtn = document.getElementById('invert');
+  var resetBtn = document.getElementById('reset');
+  var dlBtn = document.getElementById('download');
+  var orig = document.getElementById('orig');
+  var out = document.getElementById('out');
+  var sBlack = document.getElementById('sBlack');
+  var sWhite = document.getElementById('sWhite');
+  var sSize = document.getElementById('sSize');
+  var barBlack = document.getElementById('barBlack');
+
+  var lum = null;       // Uint8ClampedArray luminance 0..255
+  var w = 0, h = 0;
+  var inverted = false;
+  var fileName = 'contrast';
+
+  function load(f) {
+    if (!f || !/^image\//.test(f.type)) {
+      dropText.textContent = 'TO NIE JEST OBRAZ. WYBIERZ JPG, PNG, WEBP LUB GIF.';
+      return;
+    }
+    fileName = (f.name || 'contrast').replace(/\.[^.]+$/, '');
+    var url = URL.createObjectURL(f);
+    var img = new Image();
+    img.onload = function () {
+      var s = Math.min(1, MAX / Math.max(img.naturalWidth, img.naturalHeight));
+      w = Math.max(1, Math.round(img.naturalWidth * s));
+      h = Math.max(1, Math.round(img.naturalHeight * s));
+      orig.width = out.width = w;
+      orig.height = out.height = h;
+      var octx = orig.getContext('2d', { willReadFrequently: true });
+      // white backdrop so transparent PNGs count as white
+      octx.fillStyle = '#fff';
+      octx.fillRect(0, 0, w, h);
+      octx.drawImage(img, 0, 0, w, h);
+      var d = octx.getImageData(0, 0, w, h).data;
+      lum = new Uint8ClampedArray(w * h);
+      for (var i = 0, j = 0; i < d.length; i += 4, j++) {
+        lum[j] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+      }
+      URL.revokeObjectURL(url);
+      stage.classList.add('on');
+      dropText.textContent = 'WRZUĆ INNY OBRAZ';
+      sSize.textContent = 'ROZMIAR: ' + w + '×' + h;
+      render();
+    };
+    img.onerror = function () {
+      dropText.textContent = 'NIE UDAŁO SIĘ WCZYTAĆ OBRAZU. SPRÓBUJ INNY PLIK.';
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+
+  function render() {
+    if (!lum) return;
+    var p = parseInt(thr.value, 10);
+    thrOut.textContent = p + '%';
+    // darkness > p%  <=>  luminance < 255 * (1 - p/100)  -> black
+    var cut = 255 * (1 - p / 100);
+    var ctx = out.getContext('2d');
+    var img = ctx.createImageData(w, h);
+    var px = img.data;
+    var black = 0;
+    for (var i = 0, j = 0; j < lum.length; i += 4, j++) {
+      var isBlack = lum[j] < cut;
+      if (inverted) isBlack = !isBlack;
+      var v = isBlack ? 0 : 255;
+      if (isBlack) black++;
+      px[i] = px[i + 1] = px[i + 2] = v;
+      px[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    var pb = (black / lum.length) * 100;
+    sBlack.textContent = 'CZARNE: ' + pb.toFixed(1) + '%';
+    sWhite.textContent = 'BIAŁE: ' + (100 - pb).toFixed(1) + '%';
+    barBlack.style.width = pb + '%';
+  }
+
+  file.addEventListener('change', function () { load(file.files[0]); });
+  thr.addEventListener('input', render);
+  invertBtn.addEventListener('click', function () {
+    inverted = !inverted;
+    invertBtn.setAttribute('aria-pressed', String(inverted));
+    render();
+  });
+  resetBtn.addEventListener('click', function () { thr.value = 50; render(); });
+  dlBtn.addEventListener('click', function () {
+    if (!lum) return;
+    out.toBlob(function (b) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = fileName + '-contrast-' + thr.value + '.png';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    }, 'image/png');
+  });
+
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) load(f);
+  });
+})();
+</script>
+</body>
+</html>
